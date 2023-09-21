@@ -1,24 +1,31 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
+import {replaceSpelling} from "./replaceSpelling.ts";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+const fileInput: HTMLInputElement | null = document.querySelector("input[type=file]");
+if (fileInput == null) {
+    throw new Error("No file input found");
+}
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+function download(filename: string, text: string) {
+    let element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+fileInput.addEventListener("change", async () => {
+    if (fileInput.files == null) {
+        throw new Error("No file input found");
+    }
+    const file = fileInput.files.item(0);
+
+    if (file) {
+        const text = replaceSpelling(await file.text());
+        download("output.txt", text)
+    }
+});
